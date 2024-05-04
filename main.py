@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 
 from sql_app import crud, models, schemas
@@ -22,7 +22,7 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.post("/tasks", response_model=schemas.Task)
+@app.post("/tasks", response_model=schemas.Task, status_code=status.HTTP_201_CREATED)
 def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
     return crud.create_task(db, task=task)
 
@@ -35,7 +35,9 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     return db_task
 
 
-@app.get("/tasks/", response_model=list[schemas.Task])
-def search_tasks(task_filter: schemas.TaskFilter = Depends(), db: Session = Depends(get_db)):
+@app.get("/tasks", response_model=list[schemas.Task])
+def search_tasks(
+    task_filter: schemas.TaskFilter = Depends(), db: Session = Depends(get_db)
+):
     users = crud.search_tasks(db, task_filter=task_filter)
     return users
