@@ -7,10 +7,10 @@ class Task(Base):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True)
-    title = Column(String)
-    description = Column(String)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=False)
     due_date = Column(DateTime)
-    status = Column(String)
-    is_deleted = Column(Boolean, default=False)
+    status = Column(String, nullable=False)
+    is_deleted = Column(Boolean, default=False, nullable=False)
 
 
