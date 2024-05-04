@@ -33,3 +33,9 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     if db_task is None:
         raise HTTPException(status_code=404, detail="Task not found")
     return db_task
+
+
+@app.get("/tasks/", response_model=list[schemas.Task])
+def search_tasks(task_filter: schemas.TaskFilter = Depends(), db: Session = Depends(get_db)):
+    users = crud.search_tasks(db, task_filter=task_filter)
+    return users
