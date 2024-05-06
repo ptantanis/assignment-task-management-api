@@ -27,6 +27,13 @@ def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
     return crud.create_task(db, task=task)
 
 
+@app.patch("/tasks/{task_id}", response_model=schemas.Task)
+def update_task(
+    task_id: int, task_update: schemas.TaskUpdate, db: Session = Depends(get_db)
+):
+    return crud.update_task(db, task_id=task_id, task=task_update)
+
+
 @app.get("/tasks/{task_id}", response_model=schemas.Task)
 def get_task(task_id: int, db: Session = Depends(get_db)):
     db_task = crud.get_task(db, task_id=task_id)

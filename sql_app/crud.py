@@ -23,10 +23,10 @@ def search_tasks(db: Session, task_filter: schemas.TaskFilter):
 
     if task_filter.is_deleted is not None:
         filter.append(models.Task.is_deleted == task_filter.is_deleted)
-        
+
     if task_filter.created_by is not None:
         filter.append(models.Task.created_by == task_filter.created_by)
-        
+
     if task_filter.updated_by is not None:
         filter.append(models.Task.updated_by == task_filter.updated_by)
 
@@ -39,3 +39,10 @@ def create_task(db: Session, task: schemas.TaskCreate):
     db.commit()
     db.refresh(db_task)
     return db_task
+
+
+def update_task(db: Session, task_id: int, task: schemas.TaskUpdate):
+    db_task = db.query(models.Task).filter(models.Task.id == task_id)
+    db_task.update(values=task.model_dump(exclude_unset=True))
+    db.commit()
+    return db_task.first()
