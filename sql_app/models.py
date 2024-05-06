@@ -12,5 +12,7 @@ class Task(Base):
     due_date = Column(DateTime)
     status = Column(String, nullable=False)
     is_deleted = Column(Boolean, default=False, nullable=False)
+    created_by = Column(String, nullable=False)
+    updated_by = Column(String, nullable=False)
 
 

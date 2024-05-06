@@ -9,13 +9,15 @@ class TaskBase(BaseModel):
     due_date: datetime
     status: str
     is_deleted: bool
+    created_by: str
+    updated_by: str
 
 
 class TaskFilter(BaseModel):
     title: Optional[str] = None
-    due_date:  Optional[datetime] = None
-    status:  Optional[str] = None
-    is_deleted:  Optional[bool] = None
+    due_date: Optional[datetime] = None
+    status: Optional[str] = None
+    is_deleted: Optional[bool] = None
 
 
 class TaskCreate(TaskBase):
