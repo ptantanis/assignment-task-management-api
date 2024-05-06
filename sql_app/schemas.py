@@ -18,6 +18,8 @@ class TaskFilter(BaseModel):
     due_date: Optional[datetime] = None
     status: Optional[str] = None
     is_deleted: Optional[bool] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
 
 
 class TaskCreate(TaskBase):
