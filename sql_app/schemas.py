@@ -9,8 +9,6 @@ class TaskBase(BaseModel):
     due_date: datetime
     status: str
     is_deleted: bool
-    created_by: str
-    updated_by: str
 
 
 class TaskFilter(BaseModel):
@@ -23,11 +21,14 @@ class TaskFilter(BaseModel):
 
 
 class TaskCreate(TaskBase):
+    created_by: str
     pass
 
 
 class Task(TaskBase):
     id: int
+    created_by: str
+    updated_by: Optional[str] = None
 
     class Config:
         orm_mode = True
