@@ -55,8 +55,26 @@ def update_task(db: Session, task: schemas.Task):
     db.refresh(db_task)
     return db_task
 
+
+def undo_task(db: Session, task_id: UUID):
+    db_task = get_task(db, task_id=task_id)
+    if db_task is None:
+        raise Exception('task not found')
+    if db_task.version == 1:
+        raise Exception('Cannot undo')
+
+    db.query(models.Task).filter(
+        and_(models.Task.id == task_id, models.Task.version == (db_task.version - 1))
+    ).update({models.Task.is_current: True}, synchronize_session=False)
+
+    db.query(models.Task).filter(
+        and_(models.Task.id == task_id, models.Task.version == db_task.version)
+    ).delete(synchronize_session=False)
+    db.commit()
+    return get_task(db, task_id=task_id)
+
+
 def _update_previous_task_is_current_false(db: Session, task: schemas.Task):
     db.query(models.Task).filter(
         and_(models.Task.id == task.id, models.Task.version == (task.version - 1))
     ).update({models.Task.is_current: False}, synchronize_session=False)
-

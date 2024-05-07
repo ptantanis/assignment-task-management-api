@@ -44,6 +44,11 @@ def update_task(
     return crud.update_task(db, task=new_version)
 
 
+@app.post("/tasks/{task_id}/undo", response_model=schemas.Task)
+def undo_task(task_id: UUID, db: Session = Depends(get_db)):
+    return crud.undo_task(db, task_id=task_id)
+
+
 @app.get("/tasks/{task_id}", response_model=schemas.Task)
 def get_task(task_id: UUID, db: Session = Depends(get_db)):
     db_task = crud.get_task(db, task_id=task_id)
