@@ -1,17 +1,22 @@
+from uuid import UUID
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from . import models, schemas
 
 
-def get_task(db: Session, task_id: int):
-    return db.query(models.Task).filter(models.Task.id == task_id).first()
+def get_task(db: Session, task_id: UUID):
+    return (
+        db.query(models.Task)
+        .filter(and_(models.Task.id == task_id, models.Task.is_current == True))
+        .first()
+    )
 
 
 def search_tasks(db: Session, task_filter: schemas.TaskFilter):
     query = db.query(models.Task)
 
-    filter = []
+    filter = [models.Task.is_current == True]
     if task_filter.title is not None:
         filter.append(models.Task.title == task_filter.title)
 
@@ -34,15 +39,24 @@ def search_tasks(db: Session, task_filter: schemas.TaskFilter):
 
 
 def create_task(db: Session, task: schemas.TaskCreate):
-    db_task = models.Task(**task.model_dump())
+    db_task = models.Task(**task.model_dump(), version=1, is_current=True)
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
     return db_task
 
 
-def update_task(db: Session, task_id: int, task: schemas.TaskUpdate):
-    db_task = db.query(models.Task).filter(models.Task.id == task_id)
-    db_task.update(values=task.model_dump(exclude_unset=True))
+def update_task(db: Session, task: schemas.Task):
+    _update_previous_task_is_current_false(db, task)
+
+    db_task = models.Task(**task.model_dump())
+    db.add(db_task)
     db.commit()
-    return db_task.first()
+    db.refresh(db_task)
+    return db_task
+
+def _update_previous_task_is_current_false(db: Session, task: schemas.Task):
+    db.query(models.Task).filter(
+        and_(models.Task.id == task.id, models.Task.version == (task.version - 1))
+    ).update({models.Task.is_current: False}, synchronize_session=False)
+

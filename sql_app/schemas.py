@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
+from uuid import UUID
 
 class TaskStatusEnum(str, Enum):
     pending = "pending"
@@ -41,6 +42,8 @@ class TaskUpdate(BaseModel):
 class Task(TaskBase):
     model_config = ConfigDict(from_attributes=True)
     
-    id: int
+    id: UUID
+    version: int
+    is_current: bool
     created_by: str
     updated_by: Optional[str] = None

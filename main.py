@@ -1,3 +1,4 @@
+from uuid import UUID
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -29,13 +30,22 @@ def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
 
 @app.patch("/tasks/{task_id}", response_model=schemas.Task)
 def update_task(
-    task_id: int, task_update: schemas.TaskUpdate, db: Session = Depends(get_db)
+    task_id: UUID, task_update: schemas.TaskUpdate, db: Session = Depends(get_db)
 ):
-    return crud.update_task(db, task_id=task_id, task=task_update)
+    db_task = crud.get_task(db, task_id=task_id)
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    new_version = schemas.Task.model_validate(db_task).model_copy(
+        update=task_update.model_dump(exclude_unset=True)
+    )
+    new_version.version += 1
+
+    return crud.update_task(db, task=new_version)
 
 
 @app.get("/tasks/{task_id}", response_model=schemas.Task)
-def get_task(task_id: int, db: Session = Depends(get_db)):
+def get_task(task_id: UUID, db: Session = Depends(get_db)):
     db_task = crud.get_task(db, task_id=task_id)
     if db_task is None:
         raise HTTPException(status_code=404, detail="Task not found")
