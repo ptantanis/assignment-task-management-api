@@ -65,15 +65,22 @@ def undo_task(db: Session, task_id: UUID):
     if db_task.version == 1:
         raise Exception("Cannot undo")
 
-    db.query(models.Task).filter(
-        and_(models.Task.id == task_id, models.Task.version == (db_task.version - 1))
-    ).update({models.Task.is_current: True}, synchronize_session=False)
+    _versioned_task_query(db, task_id=task_id, version=db_task.version - 1).update(
+        {models.Task.is_current: True}, synchronize_session=False
+    )
 
-    db.query(models.Task).filter(
-        and_(models.Task.id == task_id, models.Task.version == db_task.version)
-    ).delete(synchronize_session=False)
+    _versioned_task_query(db, task_id=task_id, version=db_task.version).delete(
+        synchronize_session=False
+    )
+
     db.commit()
     return get_task(db, task_id=task_id)
+
+
+def _versioned_task_query(db: Session, task_id: UUID, version: int):
+    return db.query(models.Task).filter(
+        and_(models.Task.id == task_id, models.Task.version == version)
+    )
 
 
 def _update_previous_task_is_current_false(db: Session, task: schemas.Task):
