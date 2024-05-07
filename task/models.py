@@ -1,9 +1,7 @@
 import uuid
 from sqlalchemy import UUID, Boolean, Column, Integer, String, DateTime, Enum, BINARY
-
 from .schemas import TaskStatusEnum
-
-from .database import Base
+from database.database import Base
 
 
 class Task(Base):

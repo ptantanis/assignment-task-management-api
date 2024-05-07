@@ -1,7 +1,9 @@
 from fastapi import FastAPI
-from task import router
-from task.database import engine
+from task import models, router
+from database.database import engine
 
+# Change to use migration file for real development.
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 

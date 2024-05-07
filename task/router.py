@@ -1,12 +1,9 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from . import crud, models
+from . import crud
 from .schemas import Task, TaskCreate, TaskFilter, TaskUpdate
-from .database import get_db, engine
-
-
-models.Base.metadata.create_all(bind=engine)
+from database.database import get_db, engine
 
 
 router = APIRouter()
