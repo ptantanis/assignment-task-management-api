@@ -2,8 +2,8 @@ from uuid import UUID
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 
-from sql_app import crud, models, schemas
-from sql_app.database import SessionLocal, engine
+from task import crud, models, schemas
+from task.database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
