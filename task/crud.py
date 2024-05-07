@@ -16,7 +16,10 @@ def get_task(db: Session, task_id: UUID):
 def search_tasks(db: Session, task_filter: schemas.TaskFilter):
     query = db.query(models.Task)
 
-    filter = [models.Task.is_current == True]
+    filter = [
+        models.Task.is_current == True,
+        models.Task.is_deleted == task_filter.is_deleted,
+    ]
     if task_filter.title is not None:
         filter.append(models.Task.title == task_filter.title)
 
@@ -25,9 +28,6 @@ def search_tasks(db: Session, task_filter: schemas.TaskFilter):
 
     if task_filter.status is not None:
         filter.append(models.Task.status == task_filter.status)
-
-    if task_filter.is_deleted is not None:
-        filter.append(models.Task.is_deleted == task_filter.is_deleted)
 
     if task_filter.created_by is not None:
         filter.append(models.Task.created_by == task_filter.created_by)
@@ -39,7 +39,9 @@ def search_tasks(db: Session, task_filter: schemas.TaskFilter):
 
 
 def create_task(db: Session, task: schemas.TaskCreate):
-    db_task = models.Task(**task.model_dump(), version=1, is_current=True)
+    db_task = models.Task(
+        **task.model_dump(), version=1, is_current=True, is_deleted=False
+    )
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
@@ -59,9 +61,9 @@ def update_task(db: Session, task: schemas.Task):
 def undo_task(db: Session, task_id: UUID):
     db_task = get_task(db, task_id=task_id)
     if db_task is None:
-        raise Exception('task not found')
+        raise Exception("task not found")
     if db_task.version == 1:
-        raise Exception('Cannot undo')
+        raise Exception("Cannot undo")
 
     db.query(models.Task).filter(
         and_(models.Task.id == task_id, models.Task.version == (db_task.version - 1))

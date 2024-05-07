@@ -4,24 +4,25 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from uuid import UUID
 
+
 class TaskStatusEnum(str, Enum):
     pending = "pending"
     in_progress = "in-progress"
     completed = "completed"
+
 
 class TaskBase(BaseModel):
     title: str
     description: str
     due_date: datetime
     status: TaskStatusEnum
-    is_deleted: bool
 
 
 class TaskFilter(BaseModel):
     title: Optional[str] = None
     due_date: Optional[datetime] = None
     status: Optional[TaskStatusEnum] = None
-    is_deleted: Optional[bool] = None
+    is_deleted: bool = False
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
 
@@ -41,9 +42,10 @@ class TaskUpdate(BaseModel):
 
 class Task(TaskBase):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: UUID
     version: int
     is_current: bool
+    is_deleted: bool
     created_by: str
     updated_by: Optional[str] = None
