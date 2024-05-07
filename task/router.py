@@ -1,9 +1,11 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
+from task.errors import CannotUndoTaskError, TaskNotFoundError
 from . import crud
 from .schemas import Task, TaskCreate, TaskFilter, TaskUpdate
-from database.database import get_db, engine
+from database.database import get_db
 
 
 router = APIRouter()
@@ -30,7 +32,14 @@ def update_task(task_id: UUID, task_update: TaskUpdate, db: Session = Depends(ge
 
 @router.post("/tasks/{task_id}/undo", response_model=Task)
 def undo_task(task_id: UUID, db: Session = Depends(get_db)):
-    return crud.undo_task(db, task_id=task_id)
+    try:
+        return crud.undo_task(db, task_id=task_id)
+    except CannotUndoTaskError:
+        raise HTTPException(
+            status_code=400, detail="Cannot undo task because only one task version"
+        )
+    except TaskNotFoundError:
+        raise HTTPException(status_code=404, detail="Task not found")
 
 
 @router.get("/tasks/{task_id}", response_model=Task)

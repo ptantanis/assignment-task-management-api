@@ -3,6 +3,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from . import models, schemas
+from .errors import CannotUndoTaskError, TaskNotFoundError
 
 
 def get_task(db: Session, task_id: UUID):
@@ -61,9 +62,9 @@ def update_task(db: Session, task: schemas.Task):
 def undo_task(db: Session, task_id: UUID):
     db_task = get_task(db, task_id=task_id)
     if db_task is None:
-        raise Exception("task not found")
+        raise TaskNotFoundError()
     if db_task.version == 1:
-        raise Exception("Cannot undo")
+        raise CannotUndoTaskError()
 
     _versioned_task_query(db, task_id=task_id, version=db_task.version - 1).update(
         {models.Task.is_current: True}, synchronize_session=False
