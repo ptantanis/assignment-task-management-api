@@ -1,9 +1,12 @@
 from uuid import UUID
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from . import models, schemas
-from .errors import CannotUndoTaskError, TaskNotFoundError
+from .errors import CannotUndoTaskError, TaskNotFoundError, TaskVersionConflict
+
+SQLITE_PRIMARY_KEY_CONFLICT_CODE = 1555
 
 
 def get_task(db: Session, task_id: UUID):
@@ -54,7 +57,14 @@ def update_task(db: Session, task: schemas.Task):
 
     db_task = models.Task(**task.model_dump())
     db.add(db_task)
-    db.commit()
+
+    try:
+        db.commit()
+    except IntegrityError as e:
+        if e.orig.sqlite_errorcode == SQLITE_PRIMARY_KEY_CONFLICT_CODE:
+            raise TaskVersionConflict()
+        raise e
+
     db.refresh(db_task)
     return db_task
 

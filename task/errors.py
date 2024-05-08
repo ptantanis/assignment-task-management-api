@@ -3,3 +3,6 @@ class CannotUndoTaskError(Exception):
 
 class TaskNotFoundError(Exception):
     pass
+
+class TaskVersionConflict(Exception):
+    pass

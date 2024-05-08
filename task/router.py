@@ -2,7 +2,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from task.errors import CannotUndoTaskError, TaskNotFoundError
+from task.errors import CannotUndoTaskError, TaskNotFoundError, TaskVersionConflict
 from . import crud
 from .schemas import Task, TaskCreate, TaskFilter, TaskUpdate
 from database.database import get_db
@@ -33,8 +33,10 @@ def update_task(task_id: UUID, task_update: TaskUpdate, db: Session = Depends(ge
         update=task_update.model_dump(exclude_unset=True)
     )
     new_version.version += 1
-
-    return crud.update_task(db, task=new_version)
+    try:
+        return crud.update_task(db, task=new_version)
+    except TaskVersionConflict:
+        raise HTTPException(status_code=500, detail="Task version conflicted during update")
 
 
 @router.post(
