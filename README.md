@@ -10,4 +10,6 @@ pip install -r requirements.txt
 ```sh
 fastapi dev main.py       
 ```
-3. Go to Swagger UI at http://localhost:8000/docs 
+3. Go to Swagger UI at http://localhost:8000/docs \
+    API Consist of create, update, undo, get and search task. Check out swagger document for request and response model.
+
