@@ -1,5 +1,7 @@
 from typing import List
 
+TOTAL_ONE_DAY_SLOT = 48 # 30 minutes per slot
+
 def merge_ranges(meetings: List[tuple]):
     meetings = sorted(meetings)
     busy_ranges = []
@@ -16,20 +18,20 @@ def merge_ranges(meetings: List[tuple]):
     return busy_ranges
 
 def merge_ranges_solution_2(meetings: List[tuple]):
-    one_day_slots = ['available'] * 24
+    one_day_slots = ['available'] * TOTAL_ONE_DAY_SLOT
 
     for meeting in meetings:
         one_day_slots[meeting[0]: meeting[1]] = ['busy'] * (meeting[1] - meeting[0])
     
     busy_ranges = []
-    for index, slot_status in enumerate(one_day_slots):
+    for slot_index, slot_status in enumerate(one_day_slots):
         if slot_status != 'busy':
             continue
         
-        if len(busy_ranges) > 0 and busy_ranges[-1][1] == index:
-            busy_ranges[-1] = (busy_ranges[-1][0], index + 1)
+        if len(busy_ranges) > 0 and busy_ranges[-1][1] == slot_index:
+            busy_ranges[-1] = (busy_ranges[-1][0], slot_index + 1)
         else:
-            busy_ranges.append((index, index + 1))
+            busy_ranges.append((slot_index, slot_index + 1))
             
     return busy_ranges
 
