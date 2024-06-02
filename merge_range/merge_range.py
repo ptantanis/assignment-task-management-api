@@ -2,7 +2,7 @@ from typing import List
 
 TOTAL_ONE_DAY_SLOT = 48 # 30 minutes per slot
 
-def merge_ranges(meetings: List[tuple]):
+def merge_ranges_solution_1(meetings: List[tuple]):
     meetings = sorted(meetings)
     busy_ranges = []
     busy_slot = meetings[0]
